@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Past Grids
+        </title>
+    </head>
+    <body>
+        <canvas id="grid" width="2000" height="2000"></canvas>
+        <div style="display:none;", id='colorChoice'>
+            {{ color }}
+        </div>
+        <div style="display:none", id='savedColors'>
+            {{ savedCol }}
+        </div>
+        <div style="display:none", id='savedCoords'>
+            {{ savedCoo }}
+        </div>
+        <div style="display:none", id='time'>
+            {{ hour }}
+        </div>
+        <style>
+            body {
+                width:50vw;
+                height:50vh;
+            }
+        </style>
+        <script type="text/javascript" src="/static/js/jquery-3.6.0.js"></script>
+        <script type="text/javascript" src="/static/js/previousGrid.js"></script>
+    </body>
+</html>

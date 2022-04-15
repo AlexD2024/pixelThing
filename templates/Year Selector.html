@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Year Selector</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/colorPage.css') }}">
+    </head>
+    <body>
+        <div id='header'>
+            <a href='/'>Select a Color</a>
+            <a href='/view'>View Current Page</a>
+            <a href='/previous'>View Previous Pages</a>
+        </div>
+        <div id='content'>
+            <form method="POST", autocomplete='off', id='yearSelect'>
+                <div>
+                    {{ error }}
+                </div>
+                <p>What year would you like to see?</p>
+                <input name='year'>
+                <br>
+                <input type='submit'>
+            </form>
+        </div>
+    </body>
+</html>
