@@ -40,7 +40,7 @@ drawGrid(context);
 
 function fillSquare(x, y, color){
     context.fillStyle = color;
-    context.fillRect(x,y,9,9);
+    context.fillRect(x,y,10,10);
 }
 
 //Prepares the locations and colors for usage
