@@ -55,7 +55,7 @@ function drawGrid(context) {
 
 function fillSquare(context, x, y, colorToUse){
     context.fillStyle = colorToUse;
-    context.fillRect(x,y,9,9);
+    context.fillRect(x,y,10,10);
 }
 
 
