@@ -76,8 +76,9 @@ for (var x = 0; x < savedCoords.length; x +=1){
     xy[1] = xy[1].replace("'", '');
     xy[0] = xy[0].replace("'", '');
     color = color.replace("'", '');
-    xy[1] = xy[1].substring(0, xy[1].length - 2);
-    color = color.substring(0, color.length - 3);
+    xy[1] = xy[1].replace("'", '');
+    xy[0] = xy[0].replace("'", '');
+    color = color.replace("'", '')
     fillSquare(context, xy[0], xy[1], color);
 }
 
