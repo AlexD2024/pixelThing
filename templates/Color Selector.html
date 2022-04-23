@@ -1,24 +1,33 @@
 <!DOCTYPE html>
-<!-- saved from url=(0102)https://www.pythonanywhere.com/user/CashDot/files/home/CashDot/Pixel%20Site/templates/colorselect.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>
             Color Selector
         </title>
-        <link rel="stylesheet" href="./Color Selector_files/colorPage.css&#39;) }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/colorPage.css') }}">
     </head>
     <body>
-        <div id="header">
-            <a href="https://www.pythonanywhere.com/">Select a Color</a>
-            <a href="https://www.pythonanywhere.com/view">View Current Page</a>
-            <a href="https://www.pythonanywhere.com/previous">View Previous Pages</a>
+        <div id='header'>
+            <a href='/'>Select a Color</a>
+            <a href='/view'>View Current Page</a>
+            <a href='/previous'>View Previous Pages</a>
         </div>
-        <div id="content">
-            <form method="POST" ,="" autocomplete="off" id="colorSelect">
-                <p>What color would you like to use?</p>
-                <input type="color" name="color">
-                <br>
-                <input type="submit">
-            </form>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <div id='content'>
+            <div id='form'>
+                <form method="POST", autocomplete='off', id='colorSelect'>
+                    <p>What color would you like to use?</p>
+                    <input type='color' name='color'>
+                    <br>
+                    <input type='submit'>
+                </form>
+            </div>
         </div>
-    
-</body></html>
+
+    </body>
+</html>
