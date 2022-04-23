@@ -51,7 +51,7 @@ def colorSelected():
     for items in allCoords:
         for item in items:
             coords.append(item)
-    return render_template('index.html', savedCol=colors, savedCoo=coords, hour=dt.now().hour, color=color)
+    return render_template('index.html', savedCol=colors, savedCoo=coords, hour=dt.now().hour, color=color, savedTimes='[a,a]')
 
 # View current page
 
@@ -72,7 +72,8 @@ def viewPage():
     for items in allCoords:
         for item in items:
             coords.append(item)
-    return render_template('index.html', savedCol=colors, savedCoo=coords)
+
+    return render_template('index.html', savedCol=colors, savedCoo=coords, savedTimes='[a,a]')
 
 # View previous pages
 
@@ -95,27 +96,45 @@ def viewPrevious():
 
     colors = []
     coords = []
+    times = []
 
     if 'year' in request.form:
         year = request.form['year']
 
     cursor.execute(getTables)
     data = cursor.fetchall()
-    print(data)
     for item in data:
-        print(item[0])
         if str(year) == str(item[0]):
             cursor.execute(f'SELECT color FROM `{year}`')
             allColors = cursor.fetchall()
             cursor.execute(f'SELECT location FROM `{year}`')
             allCoords = cursor.fetchall()
+            cursor.execute(f"SELECT time FROM `{year}`")
+            allTimes = cursor.fetchall()
+
             for items in allColors:
                 for item in items:
                     colors.append(item)
             for items in allCoords:
                 for item in items:
                     coords.append(item)
-            return render_template('index.html', savedCol=colors, savedCoo=coords)
+            x = 1
+            while x < len(allTimes):
+                total = 0
+                item = allTimes[x][0]
+                try:
+                    item = item - allTimes[x-1][0]
+                    total += item.total_seconds()
+                except IndexError:
+                    print('error')
+
+                if total <= 0:
+                    total = 1.0
+
+                times.append(total)
+                x += 1
+
+            return render_template('index.html', savedCol=colors, savedCoo=coords, savedTimes=times)
         else:
             return render_template('yearSelector.html', error='No page on file for that year.')
 

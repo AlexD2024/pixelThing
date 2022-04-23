@@ -4,6 +4,7 @@ var colorUsing = document.getElementById('colorChoice').innerHTML.trim();
 var savedColors = document.getElementById('savedColors').innerHTML.trim();
 var savedCoords = document.getElementById('savedCoords').innerHTML.trim();
 var hour = document.getElementById('hour').innerHTML.trim();
+var savedTimes = document.getElementById('times').innerHTML.trim();
 var pos = [];
 var col = [];
 var pixels = '';
@@ -53,33 +54,65 @@ function drawGrid(context) {
     context.stroke();
 }
 
-function fillSquare(context, x, y, colorToUse){
+function fillSquare(x, y, colorToUse){
     context.fillStyle = colorToUse;
-    context.fillRect(x,y,9,9);
+    context.fillRect(x,y,10,10);
 }
 
 
 drawGrid(context);
 
 //Prepares the locations and colors for usage
-
 savedCoords = savedCoords.replace('[', '');
 savedCoords = savedCoords.replace(']', '');
 savedCoords = savedCoords.split(',');
 savedColors = savedColors.replace('[', '');
 savedColors = savedColors.replace(']', '');
 savedColors = savedColors.split(',');
+savedTimes = savedTimes.replace('[', '');
+savedTimes = savedTimes.replace(']', '');
+savedTimes = savedTimes.split(',');
 
-for (var x = 0; x < savedCoords.length; x +=1){
-    var xy = savedCoords[x].split('a');
-    var color = savedColors[x];
-    xy[1] = xy[1].replace("'", '');
-    xy[0] = xy[0].replace("'", '');
-    color = color.replace("'", '');
-    xy[1] = xy[1].replace("'", '');
-    xy[0] = xy[0].replace("'", '');
-    color = color.replace("'", '')
-    fillSquare(context, xy[0], xy[1], color);
+async function delay(ms) {
+    return await new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function run() {
+    for (let x = 0; x < savedCoords.length; x +=1) {
+        var time = parseInt(savedTimes[x]);
+        let xy = savedCoords[x].split('a');
+        let color = savedColors[x];
+        xy[1] = xy[1].replace("'", '');
+        xy[0] = xy[0].replace("'", '');
+        xy[1] = xy[1].replace("'", '');
+        xy[0] = xy[0].replace("'", '');
+        color = color.replace("'", '');
+        color = color.replace("'", '');
+        if (time) {
+            fillSquare(xy[0], xy[1], color);
+        }
+        const highestId = window.setTimeout(() => {
+            for (let i = highestId; i >= 0; i--) {
+            window.clearInterval(i);
+            }
+        }, 0);
+        await delay(time/100);
+    }
+}
+if (savedTimes[0] != 'a') {
+    run();
+} else {
+    for (let x = 0; x < savedCoords.length; x +=1) {
+        let xy = savedCoords[x].split('a');
+        let color = savedColors[x];
+        xy[1] = xy[1].replace("'", '');
+        xy[0] = xy[0].replace("'", '');
+        xy[1] = xy[1].replace("'", '');
+        xy[0] = xy[0].replace("'", '');
+        color = color.replace("'", '');
+        color = color.replace("'", '');
+        fillSquare(xy[0], xy[1], color);
+    }
 }
 
 //Adds an event listener to the canvas. Only adds it if they have pixels left to use.
@@ -97,7 +130,7 @@ if (acceptable.includes(colorUsing) == false) {
             pos.push(value);
             col.push(colorUsing);
             sendPython(pos, col);
-            fillSquare(context, mousePos.x, mousePos.y, colorUsing);
+            fillSquare(mousePos.x, mousePos.y, colorUsing);
             pixels = parseInt(pixels) + 1
             localStorage.setItem('count', pixels.toString() + 'a' + hour.toString())
         }, false);

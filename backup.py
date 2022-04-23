@@ -4,10 +4,10 @@ import sys
 #Connects to MYSQL
 
 db = mysql.connector.connect(
-  host="AlexDooley.mysql.pythonanywhere-services.com",
-  user="AlexDooley",
-  password="Dot($$$)06",
-  database='AlexDooley$PixelCL'
+  host="HOST",
+  user="USER",
+  password="PASSWORD",
+  database='DB'
 )
 
 cursor = db.cursor()
