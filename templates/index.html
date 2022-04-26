@@ -1,41 +1,33 @@
+
+  
 <!DOCTYPE html>
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>
-            Color Selector
+            Pixel Color
         </title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/colorPage.css') }}">
     </head>
     <body>
-        <div id='header'>
-            {% if request.cookies.get('user') %}
-                <a href='/logout'>{{ request.cookies.get('user') }}</p>
-            {% endif %}
-            <a href='/'>Select a Color</a>
-            <a href='/view'>View Current Page</a>
-            <a href='/previous'>View Previous Pages</a>
-            {% if not request.cookies.get('user') %}
-                <a href='/login'>Login</a>
-                <a href='/signup'>Sign Up</a>
-            {% endif %}
+        <canvas id="grid" width="2000" height="2000"></canvas>
+        <div style="display:none;", id='colorChoice'>
+            {{ color }}
         </div>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <div id='content'>
-            <div id='form'>
-                <form method="POST", autocomplete='off', id='colorSelect'>
-                    <div>{{ extra }}</div>
-                    <p>What color would you like to use?</p>
-                    <input type='color' name='color'>
-                    <br>
-                    <input type='submit'>
-                </form>
-            </div>
+        <div style="display:none", id='savedColors'>
+            {{ savedCol }}
         </div>
-
+        <div style="display:none", id='savedCoords'>
+            {{ savedCoo }}
+        </div>
+        <div style="display:none", id='hour'>
+            {{ hour }}
+        </div>
+        <style>
+            body {
+                width:50vw;
+                height:50vh;
+            }
+        </style>
+        <script type="text/javascript" src="/static/js/jquery-3.6.0.js"></script>
+        <script type="text/javascript" src="/static/js/grid.js"></script>
     </body>
 </html>
