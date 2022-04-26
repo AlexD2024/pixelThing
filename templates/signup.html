@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>
+            Login
+        </title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/colorPage.css') }}">
+    </head>
+    <body>
+        <div id='header'>
+            <a href='/'>Select a Color</a>
+            <a href='/view'>View Current Page</a>
+            <a href='/previous'>View Previous Pages</a>
+            <a href='/login'>Login</a>
+            <a href='/signup'>Sign Up</a>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <div id='content'>
+            <div id='form'>
+                <form method="POST", autocomplete='off', id='colorSelect'>
+                    {% if error %}
+                        <p>{{ error }}</p>
+                    {% endif %}
+                    <p>Username:</p>
+                    <input type='text' name='username' maxlength='28' required>
+                    <p>Password(8 character minimum):</p>
+                    <input type='password' name='pass' minlength='8' maxlength='28' required>
+                    <p>Email:</p>
+                    <input type='email' name='email' required>
+                    <br>
+                    <br>
+                    <input type='submit'>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
