@@ -1,6 +1,11 @@
 import mysql.connector
-from flask import Flask, render_template, request, url_for, jsonify
+from flask import Flask, render_template, request, url_for, jsonify, redirect, make_response
 from datetime import datetime as dt
+from argon2 import PasswordHasher
+from itsdangerous import URLSafeTimedSerializer
+from flask_mail import Mail, Message
+
+ph = PasswordHasher()
 
 #Sets the current year when the program in ran
 
@@ -9,27 +14,129 @@ currentYear = dt.now().year
 #Creates the flask app
 
 app = Flask(__name__)
+app.config.from_pyfile('config.py')
+mail = Mail(app)
+
+#Email token generator
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 #Connects to MYSQL
 
 db = mysql.connector.connect(
-  host="HOST",
-  user="USER",
-  password="PASSWORD",
-  database='DB'
+    host="HOST",
+    user="USER",
+    password="PASSWORD",
+    database='DB'
 )
+
+#Defines MySQL commands
 
 cursor = db.cursor()
 insert = "INSERT INTO pixels (location, color) VALUES (%s, %s)"
 getColors = "SELECT color FROM pixels"
 getLocations = 'SELECT location FROM pixels'
 getTables = 'SHOW TABLES'
+getEmail = 'SELECT email FROM users'
+
+#Logout page
+
+@app.route('/logout')
+def logout():
+    resp = make_response(redirect(url_for('login')))
+    resp.delete_cookie('user')
+    return resp
+
+@app.route('/confirm/<token>')
+def confirm(token):
+    email = serializer.loads(
+            token,
+            salt=app.config['EMAIL_SALT'],
+            max_age=3600
+        )
+    cursor.execute(f"UPDATE users SET verified=True WHERE email='{email}'")
+    db.commit()
+    return redirect(url_for('login'))
+
+#Login pages
+
+@app.route('/login')
+def login():
+    if request.cookies.get('user'):
+        return redirect(url_for('index'))
+    else:
+        return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def logged():
+    db.reconnect()
+    user = request.form['username']
+    password = request.form['pass']
+
+    if request.cookies.get('user'):
+        return redirect(url_for('index'))
+
+    try:
+        cursor.execute(f"SELECT password FROM users WHERE username='{user}'")
+        passwordStored = cursor.fetchone()
+        try:
+            if ph.verify(passwordStored[0], password):
+                resp = make_response(redirect(url_for('index')))
+                resp.set_cookie('user', user)
+                return resp
+        except Exception:
+            return(render_template('login.html', error='Incorrect password! Please try again.'))
+    except Exception:
+        return(render_template('login.html', error='No user found! Please try again.'))
+
+#Signup pages
+
+@app.route('/signup')
+def signup():
+    if request.cookies.get('user'):
+        return redirect(url_for('index'))
+    else:
+        return render_template('signup.html')
+
+@app.route('/signup', methods=['POST'])
+def signingUp():
+    db.reconnect()
+    email = request.form['email']
+    user = request.form['username']
+    password = request.form['pass']
+    password = ph.hash(password)
+
+    cursor.execute('SELECT username FROM users')
+    users = cursor.fetchall()
+    cursor.execute(getEmail)
+    emails = cursor.fetchall()
+
+    for email1 in emails:
+        for user1 in users:
+            if user in user1:
+                return render_template('signup.html', error='Username in use, please pick a different name.')
+            elif email in email1:
+                return render_template('signup.html', error='Email in use, please use a different email.')
+
+    cursor.execute(f"INSERT INTO users (username, password, email) VALUES ('{user}', '{password}', '{email}')")
+    db.commit()
+    token = serializer.dumps(email, salt=app.config['EMAIL_SALT'])
+    msg = Message(
+        'Confirmation Email -- Pixel Coloring',
+        recipients=[email],
+        html=render_template('confimed.html', confirm_url=url_for('confirm', token=token)),
+        sender=app.config['MAIL_DEFAULT_SENDER']
+    )
+    mail.send(msg)
+    return redirect(url_for('index'))
 
 # Shows grid/ asks for color
 
 @app.route('/')
 def index():
-    return render_template('colorselect.html')
+    if request.cookies.get('user'):
+        return render_template('colorselect.html')
+    else:
+        return redirect('/login')
 
 @app.route('/', methods=['POST'])
 def colorSelected():
@@ -147,13 +254,26 @@ def get_post_json():
     data = request.get_json()
     location = data['loc']
     color = data['color']
-
-    values = (location[len(location)-1], color[len(color)-1])
-
-    cursor.execute(insert, values)
-    db.commit()
-
-    return jsonify('success')
+    cursor.execute(f"SELECT placed FROM users WHERE username='{request.cookies.get('user')}'")
+    pixels = cursor.fetchone()
+    cursor.execute(f"SELECT hour FROM users WHERE username='{request.cookies.get('user')}'")
+    hour = cursor.fetchone()
+    cursor.execute(f"SELECT verified FROM users WHERE username='{request.cookies.get('user')}'")
+    verified = cursor.fetchone()
+    if verified[0]:
+        if hour[0] != dt.now().hour:
+            cursor.execute(f"UPDATE users SET hour='{dt.now().hour}', placed='0' WHERE username='{request.cookies.get('user')}'")
+            db.commit()
+        if pixels[0] != 5:
+            pixels = pixels[0] + 1
+            values = (location[len(location)-1], color[len(color)-1])
+            cursor.execute(f"UPDATE users SET placed='{pixels}' WHERE username='{request.cookies.get('user')}' ")
+            cursor.execute(insert, values)
+            db.commit()
+            return jsonify('Saved!')
+        else:
+            return jsonify('Too many pixels placed!')
+    return jsonify('Not verified!')
 
 
 if __name__ == '__main__':
